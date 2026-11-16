@@ -1,0 +1,71 @@
+service:
+  name: aac-nodered
+  image_repo: nodered/node-red
+  image_tag: 5.0-debian
+  description: Flows & Automatisierung
+  icon: node-red.png
+  category: Automation
+  stage: prod
+  hostname: nodered
+ports:
+- name: web
+  port: 1880
+  external_port: 1880
+  protocol: TCP
+config:
+  domain_name: example.com
+  generate_hostname: false
+  integrations:
+    homepage:
+      enabled: true
+    autodns:
+      enabled: true
+      create_wildcard: false
+    traefik:
+      enabled: true
+      cert_resolver: ionos
+      entrypoint: websecure
+  schema_version: 2
+stage_overrides:
+  prod:
+    config:
+      generate_hostname: false
+    service:
+      hostname: nodered
+volumes:
+  data:
+    description: Node-RED flows, nodes, and configuration
+deployment_strategy:
+  main:
+    enabled: true
+    target_stage: prod
+  dev:
+    enabled: true
+    target_stage: dev
+  test:
+    enabled: false
+    target_stage: test
+  ansible-dev:
+    enabled: true
+    target_stage: dev
+  iac-dev:
+    enabled: true
+    target_stage: dev
+  template-dev:
+    enabled: true
+    target_stage: dev
+deployments:
+  docker_compose:
+    restart_policy: always
+    host_base_path: /export/docker
+    volumes:
+    - data:/data
+    environment:
+      PUID: '{{ vars.PUID }}'
+      TZ: '{{ vars.TZ }}'
+      PGID: '{{ vars.PGID }}'
+vars:
+  PUID: '1000'
+  TZ: Europe/Berlin
+  PGID: '1000'
+secrets: {}

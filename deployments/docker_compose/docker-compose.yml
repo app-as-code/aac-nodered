@@ -1,0 +1,62 @@
+services:
+  # --- Main Application Service ---
+  aac-nodered:
+    image: "nodered/node-red:5.0-debian"
+    container_name: "aac-nodered"
+    hostname: "nodered"
+    restart: "always"
+
+
+    environment:
+      PUID: "1000"
+      TZ: "Europe/Berlin"
+      PGID: "1000"
+
+    ports:
+      - "1880:1880/tcp"
+
+    volumes:
+      - "/export/docker/aac-nodered/data:/data"
+
+    networks:
+      - exposed
+      - interconnect
+      - secured
+      - stack_internal
+
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.aac-nodered.rule: "Host(`nodered.example.com`)"
+      traefik.http.routers.aac-nodered.entrypoints: "websecure"
+      traefik.http.routers.aac-nodered.tls: "true"
+      traefik.http.routers.aac-nodered.tls.certresolver: "ionos"
+      traefik.docker.network: "services-secured"
+      traefik.http.services.aac-nodered.loadbalancer.server.port: "1880"
+      traefik.http.services.aac-nodered.loadbalancer.server.scheme: "http"
+      auto-dns.createWildcard.aac-nodered: "false"
+      auto-dns.customDNS.aac-nodered: "true"
+      auto-dns.customDOMAIN.aac-nodered: "example.com"
+      auto-dns.customHost.aac-nodered: "nodered"
+      homepage.group: "Automation"
+      homepage.name: "Nodered"
+      homepage.href: "https://nodered.example.com"
+      homepage.icon: "node-red.png"
+      homepage.description: "Flows & Automatisierung"
+
+
+
+
+networks:
+  secured:
+    name: "services-secured"
+    external: true
+  exposed:
+    name: "services-exposed"
+    external: true
+  interconnect:
+    name: "docker-default"
+    external: true
+  stack_internal:
+    name: "aac-nodered_stack_internal"
+    driver: "bridge"
+
